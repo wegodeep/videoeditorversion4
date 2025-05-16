@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "./components/Layout/Header";
 import Sidebar from "./components/Layout/Sidebar";
@@ -11,12 +12,6 @@ import MediaLibrary from "./components/MediaLibrary/MediaLibrary";
 import EffectsPanel from "./components/Effects/EffectsPanel";
 import ExportPanel from "./components/Export/ExportPanel";
 import "./App.css";
-
-// Initialize ffmpeg
-const ffmpeg = createFFmpeg({ 
-  log: true,
-  corePath: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js'
-});
 
 // Initial project state
 const initialProject = {
@@ -83,13 +78,17 @@ const VideoEditor = () => {
   const [mediaLibrary, setMediaLibrary] = useState(sampleMedia);
   const videoRef = useRef(null);
   const timelineRef = useRef(null);
+  const ffmpegRef = useRef(new FFmpeg());
 
   // Load FFmpeg on component mount
   useEffect(() => {
     const load = async () => {
       try {
-        if (!ffmpeg.isLoaded()) {
-          await ffmpeg.load();
+        const ffmpeg = ffmpegRef.current;
+        if (!ffmpeg.loaded) {
+          await ffmpeg.load({
+            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js'
+          });
         }
         setIsLoaded(true);
       } catch (error) {
