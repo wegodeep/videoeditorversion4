@@ -75,7 +75,11 @@ const VideoEditor = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [mediaLibrary, setMediaLibrary] = useState(sampleMedia);
+  // State for media library - initialize from localStorage if available
+  const [mediaLibrary, setMediaLibrary] = useState(() => {
+    const savedMedia = localStorage.getItem('videoEditor_mediaLibrary');
+    return savedMedia ? JSON.parse(savedMedia) : sampleMedia;
+  });
   const videoRef = useRef(null);
   const timelineRef = useRef(null);
   const ffmpegRef = useRef(new FFmpeg());
