@@ -84,24 +84,19 @@ const VideoEditor = () => {
   const timelineRef = useRef(null);
   const ffmpegRef = useRef(new FFmpeg());
 
-  // Load FFmpeg on component mount
+  // Save media library to localStorage whenever it changes
   useEffect(() => {
-    const load = async () => {
-      try {
-        const ffmpeg = ffmpegRef.current;
-        if (!ffmpeg.loaded) {
-          await ffmpeg.load({
-            coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js'
-          });
-        }
-        setIsLoaded(true);
-      } catch (error) {
-        console.error("Failed to load FFmpeg:", error);
-      }
-    };
-    
-    load();
-  }, []);
+    try {
+      // Create a serializable version of the media (remove File objects)
+      const serializableMedia = mediaLibrary.map(item => {
+        const { file, ...rest } = item;
+        return rest;
+      });
+      localStorage.setItem('videoEditor_mediaLibrary', JSON.stringify(serializableMedia));
+    } catch (error) {
+      console.error('Error saving media library to localStorage:', error);
+    }
+  }, [mediaLibrary]);
 
   // Add clip to timeline
   const addClipToTimeline = (mediaItem) => {
