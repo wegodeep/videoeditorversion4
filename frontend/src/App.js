@@ -302,22 +302,36 @@ const VideoEditor = () => {
 
   // Handle file upload
   const handleFileUpload = (files) => {
-    const newMedia = Array.from(files).map((file, index) => {
-      const id = `upload-${Date.now()}-${index}`;
-      const type = file.type.startsWith('video') ? 'video' : 
-                   file.type.startsWith('audio') ? 'audio' : 'image';
-      
-      return {
-        id,
-        type,
-        name: file.name,
-        duration: 30, // This would normally be extracted from the file
-        src: URL.createObjectURL(file),
-        thumbnail: type === 'video' ? URL.createObjectURL(file) : null
-      };
-    });
+    console.log("Handling file upload:", files);
+    if (!files || files.length === 0) return;
     
-    setMediaLibrary(prev => [...prev, ...newMedia]);
+    try {
+      const newMedia = Array.from(files).map((file, index) => {
+        console.log("Processing file:", file.name, file.type);
+        const id = `upload-${Date.now()}-${index}`;
+        const type = file.type.startsWith('video') ? 'video' : 
+                     file.type.startsWith('audio') ? 'audio' : 'image';
+        
+        // Create object URLs for preview
+        const fileUrl = URL.createObjectURL(file);
+        
+        return {
+          id,
+          type,
+          name: file.name,
+          duration: 30, // This would normally be extracted from the file metadata
+          src: fileUrl,
+          thumbnail: type === 'video' ? fileUrl : null,
+          // Store the original file for processing
+          file: file
+        };
+      });
+      
+      console.log("Adding new media items:", newMedia.length);
+      setMediaLibrary(prev => [...prev, ...newMedia]);
+    } catch (error) {
+      console.error("Error processing uploaded files:", error);
+    }
   };
 
   return (
